@@ -1,10 +1,16 @@
-if _G.CmdrYield then return _G.CmdrYield end
+if not game:IsLoaded() then
+	game.Loaded:Wait()
+end
+
+if type(_G.CmdrYield)=="table" then return _G.CmdrYield end
 
 local WINDOW_MAX_HEIGHT=300
 local MOUSE_TOUCH_ENUM={Enum.UserInputType.MouseButton1,Enum.UserInputType.MouseButton2,Enum.UserInputType.Touch}
 
 local CmdrYield={
 	Services={},
+	Loaded=false,
+	Initialized=false,
 }
 _G.CmdrYield=CmdrYield
 
@@ -333,8 +339,8 @@ function CmdrYield:Init()
 	local PlaceId,JobId=game.PlaceId,game.JobId
 
 	local LocalPlayer=Players.LocalPlayer
-	local ParentGui=self.Services["CoreGui"] or LocalPlayer:WaitForChild("PlayerGui")
-
+	local ParentGui=game.CoreGui
+	
 	local HISTORY_SETTING_NAME="CmdrCommandHistory"
 	local displayedBeforeRunHookWarning=false
 
@@ -3260,7 +3266,11 @@ Tips
 
 	CmdrYield.Loaded=true
 	
-	warn("Cmdr Yield Loaded, Press F3 to open CmdrYield if pc")
+	warn("Cmdr Yield Initialized, Press F3 to open CmdrYield if pc")
 end
+
+warn("Cmdr Yield Loaded.")
+
+CmdrYield:Init()
 
 return CmdrYield
