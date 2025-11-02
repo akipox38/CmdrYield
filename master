@@ -1,0 +1,2932 @@
+if _G.CmdrYield then return _G.CmdrYield end
+
+local WINDOW_MAX_HEIGHT=300
+local MOUSE_TOUCH_ENUM={Enum.UserInputType.MouseButton1,Enum.UserInputType.MouseButton2,Enum.UserInputType.Touch}
+
+local CmdrYield={
+	Services={}
+}
+_G.CmdrYield=CmdrYield
+
+function CmdrYield:Init()
+	if self.Initialized then warn("CmdrYield already initialize.") return end
+	self.Initialized=true
+	
+	local function CreateGui(parent)
+		local Cmdr=Instance.new("ScreenGui")
+		Cmdr.DisplayOrder=1000
+		Cmdr.Name="Cmdr"
+		Cmdr.ResetOnSpawn=false
+		Cmdr.AutoLocalize=false
+
+		local Frame=Instance.new("ScrollingFrame")
+		Frame.BackgroundColor3=Color3.fromRGB(17, 17, 17)
+		Frame.BackgroundTransparency=0.4
+		Frame.BorderSizePixel=0
+		Frame.CanvasSize=UDim2.new(0, 0, 0, 0)
+		Frame.Name="Frame"
+		Frame.Position=UDim2.new(0.025, 0, 0, 25)
+		Frame.ScrollBarThickness=6
+		Frame.ScrollingDirection=Enum.ScrollingDirection.Y
+		Frame.Selectable=false
+		Frame.Size=UDim2.new(0.95, 0, 0, 0)
+		Frame.Visible=false
+		Frame.AutomaticCanvasSize=Enum.AutomaticSize.Y
+		Frame.Parent=Cmdr
+
+		local Autocomplete=Instance.new("ScrollingFrame")
+		Autocomplete.BackgroundColor3=Color3.fromRGB(59, 59, 59)
+		Autocomplete.BackgroundTransparency=0.5
+		Autocomplete.BorderSizePixel=0
+		Autocomplete.CanvasSize=UDim2.new(0, 0, 0, 0)
+		Autocomplete.Name="Autocomplete"
+		Autocomplete.Position=UDim2.new(0, 167, 0, 75)
+		Autocomplete.ScrollBarThickness=6
+		Autocomplete.ScrollingDirection=Enum.ScrollingDirection.Y
+		Autocomplete.Selectable=false
+		Autocomplete.Size=UDim2.new(0, 200, 0, 200)
+		Autocomplete.Visible=false
+		Autocomplete.AutomaticCanvasSize=Enum.AutomaticSize.Y
+		Autocomplete.Parent=Cmdr
+
+		local UIListLayout=Instance.new("UIListLayout")
+		UIListLayout.SortOrder=Enum.SortOrder.LayoutOrder
+		UIListLayout.Parent=Frame
+
+		local Line=Instance.new("TextBox")
+		Line.BackgroundColor3=Color3.fromRGB(255, 255, 255)
+		Line.BackgroundTransparency=1
+		Line.Font=Enum.Font.Code
+		Line.Name="Line"
+		Line.Size=UDim2.new(1, 0, 0, 20)
+		Line.AutomaticSize=Enum.AutomaticSize.Y
+		Line.TextColor3=Color3.fromRGB(255, 255, 255)
+		Line.TextSize=14
+		Line.TextXAlignment=Enum.TextXAlignment.Left
+		Line.TextEditable=false
+		Line.ClearTextOnFocus=false
+		Line.Parent=Frame
+
+		local UIPadding=Instance.new("UIPadding")
+		UIPadding.PaddingBottom=UDim.new(0, 10)
+		UIPadding.PaddingLeft=UDim.new(0, 10)
+		UIPadding.PaddingRight=UDim.new(0, 10)
+		UIPadding.PaddingTop=UDim.new(0, 10)
+		UIPadding.Parent=Frame
+
+		local Entry=Instance.new("Frame")
+		Entry.BackgroundTransparency=1
+		Entry.LayoutOrder=999999999
+		Entry.Name="Entry"
+		Entry.Size=UDim2.new(1, 0, 0, 20)
+		Entry.Parent=Frame
+
+		local UIListLayout2=Instance.new("UIListLayout")
+		UIListLayout2.SortOrder=Enum.SortOrder.LayoutOrder
+		UIListLayout2.Parent=Autocomplete
+
+		local Title=Instance.new("Frame")
+		Title.BackgroundColor3=Color3.fromRGB(59, 59, 59)
+		Title.BackgroundTransparency=0.2
+		Title.BorderSizePixel=0
+		Title.LayoutOrder=-2
+		Title.Name="Title"
+		Title.Size=UDim2.new(1, 0, 0, 40)
+		Title.Parent=Autocomplete
+
+		local Description=Instance.new("Frame")
+		Description.BackgroundColor3=Color3.fromRGB(59, 59, 59)
+		Description.BackgroundTransparency=0.2
+		Description.BorderSizePixel=0
+		Description.LayoutOrder=-1
+		Description.Name="Description"
+		Description.Size=UDim2.new(1, 0, 0, 20)
+		Description.Parent=Autocomplete
+
+		local TextButton=Instance.new("TextButton")
+		TextButton.BackgroundColor3=Color3.fromRGB(59, 59, 59)
+		TextButton.BackgroundTransparency=0.5
+		TextButton.BorderSizePixel=0
+		TextButton.Font=Enum.Font.Code
+		TextButton.Size=UDim2.new(1, 0, 0, 30)
+		TextButton.Text=""
+		TextButton.TextColor3=Color3.fromRGB(255, 255, 255)
+		TextButton.TextSize=14
+		TextButton.TextXAlignment=Enum.TextXAlignment.Left
+		TextButton.Parent=Autocomplete
+
+		local UIListLayout3=Instance.new("UIListLayout")
+		UIListLayout3.FillDirection=Enum.FillDirection.Horizontal
+		UIListLayout3.SortOrder=Enum.SortOrder.LayoutOrder
+		UIListLayout3.Padding=UDim.new(0, 7)
+		UIListLayout3.Parent=Entry
+
+		local TextBox=Instance.new("TextBox")
+		TextBox.BackgroundColor3=Color3.fromRGB(255, 255, 255)
+		TextBox.BackgroundTransparency=1
+		TextBox.ClearTextOnFocus=false
+		TextBox.Font=Enum.Font.Code
+		TextBox.LayoutOrder=999999999
+		TextBox.Position=UDim2.new(0, 140, 0, 0)
+		TextBox.Size=UDim2.new(1, 0, 0, 20)
+		TextBox.Text="x"
+		TextBox.TextColor3=Color3.fromRGB(255, 255, 255)
+		TextBox.TextSize=14
+		TextBox.TextXAlignment=Enum.TextXAlignment.Left
+		TextBox.Selectable=false
+		TextBox.Parent=Entry
+
+		local TextLabel=Instance.new("TextLabel")
+		TextLabel.BackgroundColor3=Color3.fromRGB(255, 255, 255)
+		TextLabel.BackgroundTransparency=1
+		TextLabel.Font=Enum.Font.Code
+		TextLabel.Size=UDim2.new(0, 0, 0, 20)
+		TextLabel.AutomaticSize=Enum.AutomaticSize.X
+		TextLabel.Text=""
+		TextLabel.TextColor3=Color3.fromRGB(255, 223, 93)
+		TextLabel.TextSize=14
+		TextLabel.TextXAlignment=Enum.TextXAlignment.Left
+		TextLabel.Parent=Entry
+
+		local Field=Instance.new("TextLabel")
+		Field.BackgroundColor3=Color3.fromRGB(255, 255, 255)
+		Field.BackgroundTransparency=1
+		Field.Font=Enum.Font.SourceSansBold
+		Field.Name="Field"
+		Field.Size=UDim2.new(0, 37, 1, 0)
+		Field.Text="from"
+		Field.TextColor3=Color3.fromRGB(255, 255, 255)
+		Field.TextSize=20
+		Field.TextXAlignment=Enum.TextXAlignment.Left
+		Field.Parent=Title
+
+		local UIPadding2=Instance.new("UIPadding")
+		UIPadding2.PaddingLeft=UDim.new(0, 10)
+		UIPadding2.Parent=Title
+
+		local Label=Instance.new("TextLabel")
+		Label.BackgroundColor3=Color3.fromRGB(255, 255, 255)
+		Label.BackgroundTransparency=1
+		Label.Font=Enum.Font.SourceSansLight
+		Label.Name="Label"
+		Label.Size=UDim2.new(1, 0, 1, 0)
+		Label.Text="The players to teleport. The players to teleport. The players to teleport. The players to teleport. "
+		Label.TextColor3=Color3.fromRGB(255, 255, 255)
+		Label.TextSize=16
+		Label.TextWrapped=true
+		Label.TextXAlignment=Enum.TextXAlignment.Left
+		Label.TextYAlignment=Enum.TextYAlignment.Top
+		Label.Parent=Description
+
+		local UIPadding3=Instance.new("UIPadding")
+		UIPadding3.PaddingBottom=UDim.new(0, 10)
+		UIPadding3.PaddingLeft=UDim.new(0, 10)
+		UIPadding3.PaddingRight=UDim.new(0, 10)
+		UIPadding3.Parent=Description
+
+		local Typed=Instance.new("TextLabel")
+		Typed.BackgroundColor3=Color3.fromRGB(255, 255, 255)
+		Typed.BackgroundTransparency=1
+		Typed.Font=Enum.Font.Code
+		Typed.Name="Typed"
+		Typed.Size=UDim2.new(1, 0, 1, 0)
+		Typed.Text="Lab"
+		Typed.TextColor3=Color3.fromRGB(131, 222, 255)
+		Typed.TextSize=14
+		Typed.TextXAlignment=Enum.TextXAlignment.Left
+		Typed.Parent=TextButton
+
+		local UIPadding4=Instance.new("UIPadding")
+		UIPadding4.PaddingLeft=UDim.new(0, 10)
+		UIPadding4.Parent=TextButton
+
+		local Suggest=Instance.new("TextLabel")
+		Suggest.BackgroundColor3=Color3.fromRGB(255, 255, 255)
+		Suggest.BackgroundTransparency=1
+		Suggest.Font=Enum.Font.Code
+		Suggest.Name="Suggest"
+		Suggest.Size=UDim2.new(1, 0, 1, 0)
+		Suggest.Text="   el"
+		Suggest.TextColor3=Color3.fromRGB(255, 255, 255)
+		Suggest.TextSize=14
+		Suggest.TextXAlignment=Enum.TextXAlignment.Left
+		Suggest.Parent=TextButton
+
+		local Type=Instance.new("TextLabel")
+		Type.BackgroundColor3=Color3.fromRGB(255, 255, 255)
+		Type.BackgroundTransparency=1
+		Type.BorderColor3=Color3.fromRGB(255, 153, 153)
+		Type.Font=Enum.Font.SourceSans
+		Type.Name="Type"
+		Type.Position=UDim2.new(1, 0, 0, 0)
+		Type.Size=UDim2.new(0, 0, 1, 0)
+		Type.Text=": Players"
+		Type.TextColor3=Color3.fromRGB(255, 255, 255)
+		Type.TextSize=15
+		Type.TextXAlignment=Enum.TextXAlignment.Left
+		Type.Parent=Field
+		
+		local Open=Instance.new("TextButton")
+		Open.Name="Open"
+		Open.Parent=Cmdr
+		Open.AnchorPoint=Vector2.new(0.300000012,0)
+		Open.BackgroundColor3=Color3.fromRGB(53,53,53)
+		Open.BorderSizePixel=0
+		Open.Position=UDim2.new(0.1,0,0.1,0)
+		Open.Size=UDim2.new(0,50,0,50)
+		Open.Font=Enum.Font.FredokaOne
+		Open.Text=""
+		Open.TextColor3=Color3.fromRGB(255,255,255)
+		
+		local Title2=Instance.new("TextLabel")
+		Title2.Name="Title"
+		Title2.Parent=Open
+		Title2.AnchorPoint=Vector2.new(0.5,0.5)
+		Title2.BackgroundColor3=Color3.fromRGB(255,255,255)
+		Title2.BackgroundTransparency=1.000
+		Title2.BorderSizePixel=0
+		Title2.Position=UDim2.new(0.5,0,0.5,0)
+		Title2.Size=UDim2.new(0.617683649,0,0.617683828,0)
+		Title2.Font=Enum.Font.FredokaOne
+		Title2.Text="CY"
+		Title2.TextColor3=Color3.fromRGB(255,255,255)
+		Title2.TextScaled=true
+		Title2.TextWrapped=true
+		
+		local UICorner5=Instance.new("UICorner")
+		UICorner5.CornerRadius=UDim.new(0,32)
+		UICorner5.Parent=Open
+		
+		Cmdr.Parent=parent
+		
+		return Cmdr
+	end
+	
+	local function GetServices()
+		local services={}
+		local ServiceChildren=game:GetChildren()
+
+		local isService,service,serviceName=false,nil,nil
+		for k,v in next,ServiceChildren do
+			serviceName=v.Name
+
+			isService,service=pcall(function()
+				return game:GetService(v.Name)
+			end)
+
+			if not (isService and service) then
+				serviceName=v.ClassName
+				isService,service=pcall(function()
+					return game:GetService(v.ClassName)
+				end)
+			end
+
+			if not (isService and service) then continue end
+
+			local name=serviceName
+			if not table.find(services,name) then
+				table.insert(services,name)
+			end
+			if not services[name] then
+				services[name]=service
+			end
+		end
+
+		table.sort(services)
+		return services
+	end
+
+	local function LoadServices(services)
+		local loadedServices={}
+		for i,name in ipairs(services) do
+			if not loadedServices[name] then
+				local success,service=pcall(game.GetService,game,name)
+				if not success then
+					success,service=pcall(function() return game[name] end)
+				end
+				if success then
+					loadedServices[name]=service
+				end
+			end
+		end
+		local newServices=GetServices()
+		for k,service in pairs(newServices) do
+			if type(k)=="string" and not loadedServices[k] then
+				loadedServices[k]=service
+			end
+		end
+		return loadedServices
+	end
+
+	self.Services=LoadServices({
+		"Players","ReplicatedStorage","UserInputService","TeleportService",
+		"Lighting","StarterGui","StarterPlayer","RunService","ContextActionService",
+		"HttpService","TweenService","VirtualUser","TextChatService","MarketplaceService",
+		"UserService","CoreGui"
+	})
+	
+	local Players,GuiService,UserInputService,TextChatService,RunService,TextService,TeleportService,HttpService,StarterGui=self.Services["Players"],self.Services["GuiService"],self.Services["UserInputService"],self.Services["TextChatService"],self.Services["RunService"],self.Services["TextService"],self.Services["TeleportService"],self.Services["HttpService"],self.Services["StarterGui"]
+
+	local IsClient,IsStudio=RunService:IsClient(),RunService:IsStudio()
+	
+	local PlaceId,JobId=game.PlaceId,game.JobId
+
+	local LocalPlayer=Players.LocalPlayer
+	local ParentGui=self.Services["CoreGui"] or LocalPlayer:WaitForChild("PlayerGui")
+
+	local HISTORY_SETTING_NAME="CmdrCommandHistory"
+	local displayedBeforeRunHookWarning=false
+
+	local AutoCompleteFrame
+
+	local Gui=CreateGui(ParentGui)
+	local MainFrame=Gui:FindFirstChild("Frame")
+	local Line=MainFrame:FindFirstChild("Line")
+	local Entry=MainFrame:FindFirstChild("Entry")
+	local OpenButton=Gui:FindFirstChild("Open") :: TextButton
+	
+	Line.Parent=nil
+
+	local SecondFrame=Gui:FindFirstChild("Autocomplete")
+
+	local DexAssign=false
+	local ARGUMENT_SHORTHANDS=[[
+Argument Shorthands
+-------------------
+.   Me/Self
+*   All/Everyone
+**  Others
+?   Random
+?N  List of N random values
+]]
+	
+	local TIPS=[[
+Tips
+----
+• Utilize the Tab key to automatically complete commands
+• Easily select and copy command output
+]]
+	
+	local DefaultCommands={
+		{
+			Name="dex";
+			Aliases={};
+			Description="Explorer to see.";
+			Group="Cheat";
+			Args={};
+			Run=function(_,operation,a,b)
+				if IsStudio then return "Can't run dex in studio." end
+				if DexAssign then return "Already execute." end
+				DexAssign=true
+		
+				task.spawn(function()
+					loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))()
+				end)
+
+				return "Hold on a sec"
+			end
+		},
+		{
+			Name="blink";
+			Aliases={"b"};
+			Description="Teleports you to where your mouse is hovering.";
+			Group="DefaultDebug";
+			Args={};
+
+			Run=function(context)
+				local mouse=context.Executor:GetMouse()
+				local character=context.Executor.Character
+
+				if not character then
+					return "You don't have a character."
+				end
+
+				character:MoveTo(mouse.Hit.p)
+
+				return "Blinked!"
+			end
+		},
+		{
+			Name="serverhop",
+			Aliases={},
+			Description="Teleports you to a different public server of the same game.",
+			Group="Cheat",
+			Args={
+				{
+					Type="player",
+					Name="target",
+					Description="The players to serverhop."
+				}
+			},
+			Run=function(context)
+				if IsStudio then return "Can't rejoin in studio." end
+				
+				local player=context.Executor
+
+				local servers={}
+				local request=game:HttpGet("https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Description&limit=100&excludeFullGames=true")
+				local body=HttpService:JSONDecode(request)
+				if body and body.data then
+					for i,v in next,body.data do 
+						if type(v)=="table" and tonumber(v.playing) and tonumber(v.maxPlayers) and v.playing<v.maxPlayers and v.id~=JobId then 
+							if v.playing>=v.maxPlayers then continue end
+							table.insert(servers,1,v.id) 
+						end 
+					end
+				end
+
+				local valid=false;
+
+				if #servers>0 then
+					TeleportService:TeleportToPlaceInstance(PlaceId,servers[math.random(1,#servers)],player)
+					valid=true
+				end
+
+				return if valid then "Rejoining other server..." else {"Warn","Couldn't find a server."}
+			end,
+		},
+		{
+			Name="rejoin",
+			Aliases={},
+			Description="Instantly leaves your current server and rejoins it again.",
+			Group="Cheat",
+			Args={},
+			Run=function(context)
+				if IsStudio then return "Can't run rejoin in studio." end
+				
+				local valid=true
+
+				local player=Players.LocalPlayer
+
+				if #Players:GetPlayers()<=1 then
+					player:Kick("\nRejoining...")
+					TeleportService:Teleport(PlaceId,player)
+				else
+					TeleportService:TeleportToPlaceInstance(PlaceId,JobId,player)
+					valid=false
+				end
+
+				return valid and "Rejoining..." or "Rejoining private server..."
+			end,
+		},
+		{
+			Name="speed",
+			Aliases={},
+			Description="Sets your character speed.",
+			Group="Cheat",
+			Args={
+				{
+					Type="player",
+					Name="Target",
+					Description="The players to.",
+				},
+				{
+					Type="number",
+					Name="Amount",
+					Description="The amount to set speed."
+				}
+			},
+			Run=function(context,player,amount)
+				if not player then
+					return "Player not found."
+				end
+
+				if amount<=0 or amount~=amount or amount>=math.huge then
+					return "Amount must be a positive number or not allowed infinite number."
+				end
+
+				local character=player.Character
+				if not (character and character.Parent and character:FindFirstChildOfClass("Humanoid")) then 
+					return "Player character not loaded." 
+				end
+
+				local humanoid=character:FindFirstChildOfClass("Humanoid") :: Humanoid
+				if humanoid then
+					humanoid.WalkSpeed=amount
+				end
+			end,
+		},
+		{
+			Name="reset",
+			Aliases={},
+			Description="Respawns or resets your character back to original.",
+			Group="Cheat",
+			Args={},
+			Run=function(context)
+				local player=context.Executor
+
+				local character=player.Character
+				if not (character and character.Parent) then return "Player character not loaded." end
+
+				local humanoid=character:FindFirstChildOfClass("Humanoid")
+				if humanoid then
+					humanoid:ChangeState(Enum.HumanoidStateType.Dead)
+				else
+					character:BreakJoints()
+				end
+
+				return "Reseting..."
+			end,
+		},
+		{
+			Name="help";
+			Description="Displays a list of all commands, or inspects one command.";
+			Group="Help";
+			Args={
+				{
+					Type="command";
+					Name="Command";
+					Description="The command to view information on";
+					Optional=true;
+				},
+			};
+			Run=function(context,commandName)
+				if commandName then
+					local command=context.Registry:GetCommand(commandName)
+					context:Reply(`Command: {command.Name}`,Color3.fromRGB(230, 126, 34))
+					if command.Aliases and #command.Aliases > 0 then
+						context:Reply(`Aliases: {table.concat(command.Aliases, ", ")}`, Color3.fromRGB(230, 230, 230))
+					end
+					context:Reply(command.Description, Color3.fromRGB(230, 230, 230))
+					for i, arg in ipairs(command.Args) do
+						context:Reply(
+							`#{i} {arg.Name}{if arg.Optional == true then "?" else ""}: {arg.Type} - {arg.Description}`
+						)
+					end
+				else
+					context:Reply(ARGUMENT_SHORTHANDS)
+					context:Reply(TIPS)
+
+					local commands=context.Registry:GetCommands()
+					table.sort(commands, function(a, b)
+						return if a.Group and b.Group then a.Group < b.Group else a.Group
+					end)
+					local lastGroup
+					for _, command in ipairs(commands) do
+						command.Group=command.Group or "No Group"
+						if lastGroup ~= command.Group then
+							context:Reply(`\n{command.Group}\n{string.rep("-", #command.Group)}`)
+							lastGroup=command.Group
+						end
+						context:Reply(if command.Description then `{command.Name} - {command.Description}` else command.Name)
+					end
+				end
+				return ""
+			end;
+		},
+	}
+	
+	local DefaultTypes={
+		-- BindableResource
+		function(context)
+			context.Registry:RegisterType("bindableResource",context.Util.MakeEnumType("BindableResource", {"Chat"}))
+		end,
+		-- BrickColor
+		function(context)
+			local Util=context.Util
+			local Registry=context.Registry
+
+			local brickColorNames={
+				"White", "Grey", "Light yellow", "Brick yellow", "Light green (Mint)", "Light reddish violet", "Pastel Blue",
+				"Light orange brown", "Nougat", "Bright red", "Med. reddish violet", "Bright blue", "Bright yellow", "Earth orange",
+				"Black", "Dark grey", "Dark green", "Medium green", "Lig. Yellowich orange", "Bright green", "Dark orange",
+				"Light bluish violet", "Transparent", "Tr. Red", "Tr. Lg blue", "Tr. Blue", "Tr. Yellow", "Light blue",
+				"Tr. Flu. Reddish orange", "Tr. Green", "Tr. Flu. Green", "Phosph. White", "Light red", "Medium red", "Medium blue",
+				"Light grey", "Bright violet", "Br. yellowish orange", "Bright orange", "Bright bluish green", "Earth yellow",
+				"Bright bluish violet", "Tr. Brown", "Medium bluish violet", "Tr. Medi. reddish violet", "Med. yellowish green",
+				"Med. bluish green", "Light bluish green", "Br. yellowish green", "Lig. yellowish green", "Med. yellowish orange",
+				"Br. reddish orange", "Bright reddish violet", "Light orange", "Tr. Bright bluish violet", "Gold", "Dark nougat",
+				"Silver", "Neon orange", "Neon green", "Sand blue", "Sand violet", "Medium orange", "Sand yellow", "Earth blue",
+				"Earth green", "Tr. Flu. Blue", "Sand blue metallic", "Sand violet metallic", "Sand yellow metallic",
+				"Dark grey metallic", "Black metallic", "Light grey metallic", "Sand green", "Sand red", "Dark red",
+				"Tr. Flu. Yellow", "Tr. Flu. Red", "Gun metallic", "Red flip/flop", "Yellow flip/flop", "Silver flip/flop", "Curry",
+				"Fire Yellow", "Flame yellowish orange", "Reddish brown", "Flame reddish orange", "Medium stone grey", "Royal blue",
+				"Dark Royal blue", "Bright reddish lilac", "Dark stone grey", "Lemon metalic", "Light stone grey", "Dark Curry",
+				"Faded green", "Turquoise", "Light Royal blue", "Medium Royal blue", "Rust", "Brown", "Reddish lilac", "Lilac",
+				"Light lilac", "Bright purple", "Light purple", "Light pink", "Light brick yellow", "Warm yellowish orange",
+				"Cool yellow", "Dove blue", "Medium lilac", "Slime green", "Smoky grey", "Dark blue", "Parsley green", "Steel blue",
+				"Storm blue", "Lapis", "Dark indigo", "Sea green", "Shamrock", "Fossil", "Mulberry", "Forest green", "Cadet blue",
+				"Electric blue", "Eggplant", "Moss", "Artichoke", "Sage green", "Ghost grey", "Lilac", "Plum", "Olivine",
+				"Laurel green", "Quill grey", "Crimson", "Mint", "Baby blue", "Carnation pink", "Persimmon", "Maroon", "Gold",
+				"Daisy orange", "Pearl", "Fog", "Salmon", "Terra Cotta", "Cocoa", "Wheat", "Buttermilk", "Mauve", "Sunrise",
+				"Tawny", "Rust", "Cashmere", "Khaki", "Lily white", "Seashell", "Burgundy", "Cork", "Burlap", "Beige", "Oyster",
+				"Pine Cone", "Fawn brown", "Hurricane grey", "Cloudy grey", "Linen", "Copper", "Dirt brown", "Bronze", "Flint",
+				"Dark taupe", "Burnt Sienna", "Institutional white", "Mid gray", "Really black", "Really red", "Deep orange",
+				"Alder", "Dusty Rose", "Olive", "New Yeller", "Really blue", "Navy blue", "Deep blue", "Cyan", "CGA brown",
+				"Magenta", "Pink", "Deep orange", "Teal", "Toothpaste", "Lime green", "Camo", "Grime", "Lavender",
+				"Pastel light blue", "Pastel orange", "Pastel violet", "Pastel blue-green", "Pastel green", "Pastel yellow",
+				"Pastel brown", "Royal purple", "Hot pink"
+			}
+
+			local brickColorFinder=Util.MakeFuzzyFinder(brickColorNames)
+
+			local brickColorType= {
+				Prefixes="% teamColor";
+
+				Transform=function(text)
+					local brickColors={}
+					for i, name in pairs(brickColorFinder(text)) do
+						brickColors[i]=BrickColor.new(name)
+					end
+					return brickColors
+				end;
+
+				Validate=function(brickColors)
+					return #brickColors > 0, "No valid brick colors with that name could be found."
+				end;
+
+				Autocomplete=function(brickColors)
+					return Util.GetNames(brickColors)
+				end;
+
+				Parse=function(brickColors)
+					return brickColors[1]
+				end;
+			}
+
+			local brickColor3Type={
+				Transform=brickColorType.Transform;
+				Validate=brickColorType.Validate;
+				Autocomplete=brickColorType.Autocomplete;
+				Parse=function(brickColors)
+					return brickColors[1].Color
+				end;
+			}
+
+			Registry:RegisterType("brickColor", brickColorType)
+			Registry:RegisterType("brickColors", Util.MakeListableType(brickColorType, {
+				Prefixes="% teamColors"
+			}))
+
+			Registry:RegisterType("brickColor3", brickColor3Type)
+			Registry:RegisterType("brickColor3s", Util.MakeListableType(brickColor3Type))
+		end,
+		-- Color3 and HexColor3
+		function(context)
+			local Util=context.Util
+			local Registry=context.Registry
+
+			local color3Type=Util.MakeSequenceType({
+				Prefixes="# hexColor3 ! brickColor3";
+				ValidateEach=function(value, i)
+					if value == nil then
+						return false, ("Invalid or missing number at position %d in Color3 type."):format(i)
+					elseif value < 0 or value > 255 then
+						return false, ("Number out of acceptable range 0-255 at position %d in Color3 type."):format(i)
+					elseif value % 1 ~= 0 then
+						return false, ("Number is not an integer at position %d in Color3 type."):format(i)
+					end
+
+					return true
+				end;
+				TransformEach=tonumber;
+				Constructor=Color3.fromRGB;
+				Length=3;
+			})
+			-- Constructor is Color3.fromRGB
+			local function parseHexDigit(x)
+				if #x == 1 then
+					x=x .. x
+				end
+
+				return tonumber(x, 16)
+			end
+
+			local hexColor3Type={
+				Transform=function(text)
+					local r, g, b=text:match("^#?(%x%x?)(%x%x?)(%x%x?)$")
+					return Util.Each(parseHexDigit, r, g, b)
+				end;
+
+				Validate=function(r, g, b)
+					return r ~= nil and g ~= nil and b ~= nil, "Invalid hex color"
+				end;
+
+				Parse=function(...)
+					return Color3.fromRGB(...)
+				end;
+			}
+
+
+			Registry:RegisterType("color3", color3Type)
+			Registry:RegisterType("color3s", Util.MakeListableType(color3Type, {
+				Prefixes="# hexColor3s ! brickColor3s"
+			}))
+
+			Registry:RegisterType("hexColor3", hexColor3Type)
+			Registry:RegisterType("hexColor3s", Util.MakeListableType(hexColor3Type))
+		end,
+		-- Player
+		function(context)
+			local Util=context.Util
+			local Registry=context.Registry
+
+			local playerType={
+				Transform=function (text)
+					local findPlayer=Util.MakeFuzzyFinder(Players:GetPlayers())
+					return findPlayer(text)
+				end;
+
+				Validate=function(players)
+					return #players>0,"No player with that name could be found."
+				end;
+
+				Autocomplete=function(players)
+					return Util.GetNames(players)
+				end;
+
+				Parse=function (players)
+					return players[1]
+				end;
+
+				Default=function(player)
+					return player.Name
+				end;
+
+				ArgumentOperatorAliases={
+					me=".";
+					all="*";
+					others="**";
+					random="?";
+				};
+			}
+
+			Registry:RegisterType("player",playerType)
+			Registry:RegisterType("players",Util.MakeListableType(playerType,{
+				Prefixes="% teamPlayers";
+			}))
+		end,
+		-- Primitives
+		function(context)
+			local Util=context.Util
+			local Registry=context.Registry
+
+			local stringType={
+				Validate=function(value)
+					return value ~= nil
+				end;
+
+				Parse=function(value)
+					return tostring(value)
+				end;
+			}
+
+			local numberType={
+				Transform=function(text)
+					return tonumber(text)
+				end;
+
+				Validate=function(value)
+					return value ~= nil
+				end;
+
+				Parse=function(value)
+					return value
+				end;
+			}
+
+			local intType={
+				Transform=function(text)
+					return tonumber(text)
+				end;
+
+				Validate=function(value)
+					return value ~= nil and value == math.floor(value),"Only whole numbers are valid."
+				end;
+
+				Parse=function(value)
+					return value
+				end
+			}
+
+			local positiveIntType={
+				Transform=function(text)
+					return tonumber(text)
+				end,
+
+				Validate=function(value)
+					return value ~= nil and value == math.floor(value) and value > 0,"Only positive whole numbers are valid."
+				end,
+
+				Parse=function(value)
+					return value
+				end,
+			}
+
+			local nonNegativeIntType={
+				Transform=function(text)
+					return tonumber(text)
+				end,
+
+				Validate=function(value)
+					return value ~= nil and value == math.floor(value) and value >= 0,"Only non-negative whole numbers are valid."
+				end,
+
+				Parse=function(value)
+					return value
+				end,
+			}
+
+			local byteType={
+				Transform=function(text)
+					return tonumber(text)
+				end,
+
+				Validate=function(value)
+					return value ~= nil and value == math.floor(value) and value >= 0 and value <= 255,"Only bytes are valid."
+				end,
+
+				Parse=function(value)
+					return value
+				end,
+			}
+
+			local digitType={
+				Transform=function(text)
+					return tonumber(text)
+				end,
+
+				Validate=function(value)
+					return value ~= nil and value == math.floor(value) and value >= 0 and value <= 9,"Only digits are valid."
+				end,
+
+				Parse=function(value)
+					return value
+				end,
+			}
+
+			local boolType do
+				local truthy=Util.MakeDictionary({"true","t","yes","y","on","enable","enabled","1","+"});
+				local falsy=Util.MakeDictionary({"false"; "f"; "no"; "n"; "off"; "disable"; "disabled"; "0"; "-"});
+
+				boolType={
+					Transform=function(text)
+						return text:lower()
+					end;
+
+					Validate=function(value)
+						return truthy[value] ~= nil or falsy[value] ~= nil,"Please use true/yes/on or false/no/off."
+					end;
+
+					Parse=function(value)
+						if truthy[value] then
+							return true
+						elseif falsy[value] then
+							return false
+						else
+							return nil
+						end
+					end;
+				}
+			end
+
+			Registry:RegisterType("string",stringType)
+			Registry:RegisterType("number",numberType)
+			Registry:RegisterType("integer",intType)
+			Registry:RegisterType("positiveInteger",positiveIntType)
+			Registry:RegisterType("nonNegativeInteger",nonNegativeIntType)
+			Registry:RegisterType("byte",byteType)
+			Registry:RegisterType("digit",digitType)
+			Registry:RegisterType("boolean",boolType)
+
+			Registry:RegisterType("strings",Util.MakeListableType(stringType))
+			Registry:RegisterType("numbers",Util.MakeListableType(numberType))
+			Registry:RegisterType("integers",Util.MakeListableType(intType))
+			Registry:RegisterType("positiveIntegers",Util.MakeListableType(positiveIntType))
+			Registry:RegisterType("nonNegativeIntegers",Util.MakeListableType(nonNegativeIntType))
+			Registry:RegisterType("bytes",Util.MakeListableType(byteType))
+			Registry:RegisterType("digits",Util.MakeListableType(digitType))
+			Registry:RegisterType("booleans",Util.MakeListableType(boolType))
+		end,
+		-- Url
+		function(context)
+			local Util=context.Util
+			local Registry=context.Registry
+
+			local storedKeyType={
+				Validate=function(text)
+					if text:match("^https?://.+$") then
+						return true
+					end
+
+					return false, "URLs must begin with http:// or https://"
+				end;
+
+				Parse=function(text)
+					return text
+				end;
+			}
+
+			Registry:RegisterType("url", storedKeyType)
+			Registry:RegisterType("urls", Util.MakeListableType(storedKeyType))
+		end,
+		-- MathOperator
+		function(context)
+			local Util=context.Util
+			local Registry=context.Registry
+
+			Registry:RegisterType("mathOperator", Util.MakeEnumType("Math Operator", {
+				{
+					Name="+";
+					Perform=function(a, b)
+						return a + b
+					end
+				};
+				{
+					Name="-";
+					Perform=function(a, b)
+						return a - b
+					end
+				};
+				{
+					Name="*";
+					Perform=function(a, b)
+						return a * b
+					end
+				};
+				{
+					Name="/";
+					Perform=function(a, b)
+						return a / b
+					end
+				};
+				{
+					Name="**";
+					Perform=function(a, b)
+						return a ^ b
+					end
+				};
+				{
+					Name="%";
+					Perform=function(a, b)
+						return a % b
+					end
+				}
+			}))
+		end,
+		-- Explorer
+		function(context)
+			local Util=context.Util
+			local Registry=context.Registry
+			
+			local typeObject={}
+			
+			for k,v in pairs(CmdrYield.Services) do
+				table.insert(typeObject,{
+					Name=k
+				})
+			end
+			
+			Registry:RegisterType("ExplorerType", Util.MakeEnumType("ExplorerType",typeObject))
+		end,
+		-- Command
+		function(context)
+			local Util=context.Util
+			local Registry=context.Registry
+			
+			local commandType={
+				Transform=function(text)
+					local findCommand=Util.MakeFuzzyFinder(Registry:GetCommandNames())
+
+					return findCommand(text)
+				end;
+
+				Validate=function(commands)
+					return #commands > 0, "No command with that name could be found."
+				end;
+
+				Autocomplete=function(commands)
+					return commands
+				end;
+
+				Parse=function(commands)
+					return commands[1]
+				end;
+			}
+
+			Registry:RegisterType("command", commandType)
+			Registry:RegisterType("commands", Util.MakeListableType(commandType))
+		end
+	}
+	
+	local DefaultEvents={
+		function(context)
+			local Registry=context.Registry
+			local Window=context.Window
+			
+			Registry:BindEvent("Message",function(text)
+				StarterGui:SetCore("ChatMakeSystemMessage", {
+					Text = ("[Announcement] %s"):format(text);
+					Color = Color3.fromRGB(249, 217, 56);
+				})
+			end)
+
+			Registry:BindEvent("AddLine",function(...)
+				Window:AddLine(...)
+			end)
+		end
+	}
+	
+	local function GrabUI(frame)
+		task.spawn(function()
+			local dragging,dragInput,dragStart,startPos
+			frame.InputBegan:Connect(function(input)
+				if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
+					dragging=true dragStart=input.Position startPos=frame.Position
+					input.Changed:Connect(function() if input.UserInputState==Enum.UserInputState.End then dragging=false end end)
+				end
+			end)
+			frame.InputChanged:Connect(function(input)
+				if input.UserInputType==Enum.UserInputType.MouseMovement or input.UserInputType==Enum.UserInputType.Touch then dragInput=input end
+			end)
+			UserInputService.InputChanged:Connect(function(input)
+				if input==dragInput and dragging then
+					local delta=input.Position-dragStart
+					frame.Position=UDim2.new(startPos.X.Scale,startPos.X.Offset+delta.X,startPos.Y.Scale,startPos.Y.Offset+delta.Y)
+				end
+			end)
+		end)
+	end
+	
+	local Strs={}
+	do
+		local OPERATORS={"&&","||",";"}
+		
+		local function CharCode(n)
+			return utf8.char(tonumber(n, 16))
+		end
+		
+		local function EncodeControlChars(text)
+			return (
+				text
+					:gsub("\\\\", "___!CMDR_ESCAPE!___")
+					:gsub("\\\"", "___!CMDR_QUOTE!___")
+					:gsub("\\'", "___!CMDR_SQUOTE!___")
+					:gsub("\\\n", "___!CMDR_NL!___")
+			)
+		end
+
+		local function DecodeControlChars(text)
+			return (
+				text
+					:gsub("___!CMDR_ESCAPE!___", "\\")
+					:gsub("___!CMDR_QUOTE!___", "\"")
+					:gsub("___!CMDR_NL!___", "\n")
+			)
+		end
+		
+		function Strs.UnescapeOperators(text)
+			for i,operator in ipairs({"%.","%?","%*","%*%*"}) do
+				text=text:gsub("\\"..operator,operator:gsub("%%",""))
+			end
+			return text
+		end
+		
+		function Strs.SplitPrioritizedDelimeter(text,delimeters)
+			for i,delimeter in ipairs(delimeters) do
+				if text:find(delimeter) or i == #delimeters then
+					return Strs.SplitSimple(text, delimeter)
+				end
+			end
+		end
+
+		function Strs.SplitSimple(inputstr,pattern)
+			if pattern==nil then
+				pattern="%s"
+			end
+			local i,t=1,{}
+			for s in string.gmatch(inputstr, "([^" .. pattern .. "]+)") do
+				t[i]=s
+				i=i+1
+			end
+			return t
+		end
+	
+		function Strs.EmulateTabstops(text, tabWidth)
+			local column=0
+			local textLength=#text
+			local result=table.create(textLength)
+			for i=1, textLength do
+				local char=string.sub(text, i, i)
+				if char == "\t" then
+					local spaces=tabWidth - column % tabWidth
+					table.insert(result, string.rep(" ", spaces))
+					column += spaces
+				else
+					table.insert(result, char)
+					if char == "\n" then
+						column=0
+					elseif char ~= "\r" then
+						column += 1
+					end
+				end
+			end
+			return table.concat(result)
+		end
+		
+		function Strs.Trim(s)
+			local to,from=string.find(s,"^%s*")
+			return from==#s and "" or string.match(s,".*%S",from+1)
+		end
+		
+		function Strs.ParseEscapeSequences(text)
+			return text:gsub("\\(.)",{t="\t",n="\n",}):gsub("\\u(%x%x%x%x)",CharCode):gsub("\\x(%x%x)",CharCode)
+		end
+		
+		function Strs.EncodeEscapedOperator(text,pattern)
+			local first=pattern:sub(1, 1)
+			local escapedOp=pattern:gsub(".","%%%1")
+			local escapedFirst="%"..first
+
+			return text:gsub("(" .. escapedFirst .. "+)(" .. escapedOp .. ")", function(esc, pattern)
+				return (esc:sub(1, #esc-1) .. pattern):gsub(".", function(char)
+					return "\\u" .. string.format("%04x", string.byte(char), 16)
+				end)
+			end)
+		end
+		
+		function Strs.EncodeEscapedOperators(text)
+			for i,operator in ipairs(OPERATORS) do
+				text=Strs.EncodeEscapedOperator(text,operator)
+			end
+			return text
+		end
+
+		function Strs.Split(text,max)
+			text=EncodeControlChars(text)
+			max=max or math.huge
+			local t={}
+			local spat, epat=[=[^(['"])]=], [=[(['"])$]=]
+			local buf, quoted
+			for s in text:gmatch("[^ ]+") do
+				s=Strs.ParseEscapeSequences(s)
+				local squoted=s:match(spat)
+				local equoted=s:match(epat)
+				local escaped=s:match([=[(\*)['"]$]=])
+				if squoted and not quoted and not equoted then
+					buf,quoted=s, squoted
+				elseif buf and equoted == quoted and #escaped % 2 == 0 then
+					s,buf,quoted=buf .. " " .. s, nil, nil
+				elseif buf then
+					buf=buf .. " " .. s
+				end
+				if not buf then
+					t[#t + (#t > max and 0 or 1)]=DecodeControlChars(s:gsub(spat, ""):gsub(epat, ""))
+				end
+			end
+
+			if buf then
+				t[#t + (#t > max and 0 or 1)]=DecodeControlChars(buf)
+			end
+
+			return t
+		end
+	end
+	
+	local Util={}
+	do
+		local function TransformInstanceSet(instances)
+			local names={}
+
+			for i=1, #instances do
+				names[i]=instances[i].Name
+			end
+
+			return names, instances
+		end
+		
+		function Util.GetNames(instances)
+			local names={}
+
+			for i=1,#instances do
+				names[i]=instances[i].Name or tostring(instances[i])
+			end
+
+			return names
+		end
+		
+		function Util.MakeDictionary(array)
+			local dictionary={}
+
+			for i=1, #array do
+				dictionary[array[i]]=true
+			end
+
+			return dictionary
+		end
+
+		function Util.DictionaryKeys(dict)
+			local keys={}
+
+			for key in pairs(dict) do
+				table.insert(keys, key)
+			end
+
+			return keys
+		end
+
+		function Util.MakeFuzzyFinder(setOrContainer)
+			local names
+			local instances={}
+
+			if typeof(setOrContainer) == "Enum" then
+				setOrContainer=setOrContainer:GetEnumItems()
+			end
+
+			if typeof(setOrContainer) == "Instance" then
+				names, instances=TransformInstanceSet(setOrContainer:GetChildren())
+			elseif typeof(setOrContainer) == "table" then
+				if
+					typeof(setOrContainer[1]) == "Instance" or typeof(setOrContainer[1]) == "EnumItem" or
+					(typeof(setOrContainer[1]) == "table" and typeof(setOrContainer[1].Name) == "string")
+				then
+					names, instances=TransformInstanceSet(setOrContainer)
+				elseif type(setOrContainer[1]) == "string" then
+					names=setOrContainer
+				elseif setOrContainer[1] ~= nil then
+					error("[CmdrYield]: Util MakeFuzzyFinder only accepts tables of instances or strings.")
+				else
+					names={}
+				end
+			else
+				error("[CmdrYield]: Util MakeFuzzyFinder only accepts a table, Enum, or Instance.")
+			end
+
+			-- Searches the set (checking exact matches first)
+			return function(text, returnFirst)
+				local results={}
+
+				for i, name in pairs(names) do
+					local value=instances and instances[i] or name
+
+					-- Continue on checking for non-exact matches...
+					-- Still need to loop through everything, even on returnFirst, because possibility of an exact match.
+					if name:lower() == text:lower() then
+						if returnFirst then
+							return value
+						else
+							table.insert(results, 1, value)
+						end
+					elseif name:lower():find(text:lower(), 1, true) then
+						results[#results + 1]=value
+					end
+				end
+
+				if returnFirst then
+					return results[1]
+				end
+
+				return results
+			end
+		end
+
+		function Util.MashExcessArguments(arguments, max)
+			local t={}
+			for i=1, #arguments do
+				if i > max then
+					t[max]=("%s %s"):format(t[max] or "", arguments[i])
+				else
+					t[i]=arguments[i]
+				end
+			end
+			return t
+		end
+
+		function Util.GetTextSize(text, label, size)
+			return TextService:GetTextSize(text, label.TextSize, label.Font, size or Vector2.new(label.AbsoluteSize.X, 0))
+		end
+
+		function Util.MakeEnumType(name, values)
+			local findValue=Util.MakeFuzzyFinder(values)
+			return {
+				Validate=function(text)
+					return findValue(text, true) ~= nil, ("Value %q is not a valid %s."):format(text, name)
+				end,
+				Autocomplete=function(text)
+					local list=findValue(text)
+					return type(list[1]) ~= "string" and Strs.GetNames(list) or list
+				end,
+				Parse=function(text)
+					return findValue(text, true)
+				end
+			}
+		end
+
+		function Util.ParsePrefixedUnionType(typeValue, rawValue)
+			local split=Strs.SplitSimple(typeValue)
+
+			-- Check prefixes in order from longest to shortest
+			local types={}
+			for i=1, #split, 2 do
+				types[#types + 1]={
+					prefix=split[i - 1] or "",
+					type=split[i]
+				}
+			end
+
+			table.sort(
+				types,
+				function(a, b)
+					return #a.prefix > #b.prefix
+				end
+			)
+
+			for i=1, #types do
+				local t=types[i]
+
+				if rawValue:sub(1, #t.prefix) == t.prefix then
+					return t.type, rawValue:sub(#t.prefix + 1), t.prefix
+				end
+			end
+		end
+
+		function Util.MakeListableType(type, override)
+			local listableType={
+				Listable=true,
+				Transform=type.Transform,
+				Validate=type.Validate,
+				ValidateOnce=type.ValidateOnce,
+				Autocomplete=type.Autocomplete,
+				Default=type.Default,
+				ArgumentOperatorAliases=type.ArgumentOperatorAliases,
+				Parse=function(...)
+					return {type.Parse(...)}
+				end
+			}
+
+			if override then
+				for key, value in pairs(override) do
+					listableType[key]=value
+				end
+			end
+
+			return listableType
+		end
+
+		local function encodeCommandEscape(text)
+			return (text:gsub("\\%$", "___!CMDR_DOLLAR!___"))
+		end
+
+		local function decodeCommandEscape(text)
+			return (text:gsub("___!CMDR_DOLLAR!___", "$"))
+		end
+
+		function Util.RunCommandString(dispatcher, commandString)
+			commandString=Util.ParseEscapeSequences(commandString)
+			commandString=Util.EncodeEscapedOperators(commandString)
+
+			local commands=commandString:split("&&")
+
+			local output=""
+			for i, command in ipairs(commands) do
+				local outputEncoded=output:gsub("%$", "\\x24"):gsub("%%","%%%%")
+				command=command:gsub("||", output:find("%s") and ("%q"):format(outputEncoded) or outputEncoded)
+
+				output=tostring(
+					dispatcher:Execute(
+						(
+							Util.RunEmbeddedCommands(dispatcher, command)
+						)
+					)
+				)
+
+
+				if i == #commands then
+					return output
+				end
+			end
+		end
+
+		function Util.RunEmbeddedCommands(dispatcher, str)
+			str=encodeCommandEscape(str)
+
+			local results={}
+			-- We need to do this because you can't yield in the gsub function
+			for text in str:gmatch("$(%b{})") do
+				local doQuotes=true
+				local commandString=text:sub(2, #text-1)
+
+				if commandString:match("^{.+}$") then -- Allow double curly for literal replacement
+					doQuotes=false
+					commandString=commandString:sub(2, #commandString-1)
+				end
+
+				results[text]=Util.RunCommandString(dispatcher, commandString)
+
+				if doQuotes then
+					if results[text]:find("%s") or results[text] == "" then
+						results[text]=string.format("%q", results[text])
+					end
+				end
+			end
+
+			return decodeCommandEscape(str:gsub("$(%b{})", results))
+		end
+
+		function Util.SubstituteArgs(str, replace)
+			str=encodeCommandEscape(str)
+			-- Convert numerical keys to strings
+			if type(replace) == "table" then
+				for i=1, #replace do
+					local k=tostring(i)
+					replace[k]=replace[i]
+
+					if replace[k]:find("%s") then
+						replace[k]=string.format("%q", replace[k])
+					end
+				end
+			end
+			return decodeCommandEscape(str:gsub("($%d+)%b{}", "%1"):gsub("$(%w+)", replace))
+		end
+		
+		function Util.MakeAliasCommand(name, commandString)
+			local commandName, commandDescription=unpack(name:split("|"))
+			local args={}
+
+			commandString=Util.EncodeEscapedOperators(commandString)
+
+			local seenArgs={}
+
+			for arg in commandString:gmatch("$(%d+)") do
+				if seenArgs[arg] == nil then
+					seenArgs[arg]=true
+					local options=commandString:match(`${arg}(%b\{})`)
+
+					local argOptional, argType, argName, argDescription
+					if options then
+						options=options:sub(2, #options - 1) -- remove braces
+						argType, argName, argDescription=unpack(options:split("|"))
+					end
+
+					argOptional=argType and not not argType:match("%?$")
+					argType=if argType then argType:match("^%w+") else "string"
+					argName=argName or `Argument {arg}`
+					argDescription=argDescription or ""
+
+					table.insert(args, {
+						Type=argType,
+						Name=argName,
+						Description=argDescription,
+						Optional=argOptional,
+					})
+				end
+			end
+
+			return {
+				Name=commandName,
+				Aliases={},
+				Description=`<Alias> {commandDescription or commandString}`,
+				Group="UserAlias",
+				Args=args,
+				Run=function(context)
+					return Util.RunCommandString(context.Dispatcher, Util.SubstituteArgs(commandString, context.RawArguments))
+				end,
+			}
+		end
+
+		function Util.MakeSequenceType(options)
+			options=options or {}
+
+			assert(options.Parse ~= nil or options.Constructor ~= nil, "MakeSequenceType: Must provide one of: Constructor, Parse")
+
+			options.TransformEach=options.TransformEach or function(...)
+				return ...
+			end
+
+			options.ValidateEach=options.ValidateEach or function()
+				return true
+			end
+
+			return {
+				Prefixes=options.Prefixes;
+
+				Transform=function (text)
+					return Util.Map(Strs.SplitPrioritizedDelimeter(text, {",", "%s"}), function(value)
+						return options.TransformEach(value)
+					end)
+				end;
+
+				Validate=function (components)
+					if options.Length and #components > options.Length then
+						return false, ("Maximum of %d values allowed in sequence"):format(options.Length)
+					end
+
+					for i=1, options.Length or #components do
+						local valid, reason=options.ValidateEach(components[i], i)
+
+						if not valid then
+							return false, reason
+						end
+					end
+
+					return true
+				end;
+
+				Parse=options.Parse or function(components)
+					return options.Constructor(unpack(components))
+				end
+			}
+		end
+
+	
+
+		function Util.Map(array, callback)
+			local results={}
+			for i, v in ipairs(array) do
+				results[i]=callback(v, i)
+			end
+			return results
+		end
+
+		function Util.Each(callback, ...)
+			local results={}
+			for i, value in ipairs({...}) do
+				results[i]=callback(value)
+			end
+			return unpack(results)
+		end
+
+		
+		function Util.Mutex()
+			local queue={}
+			local locked=false
+
+			return function ()
+				if locked then
+					table.insert(queue,coroutine.running())
+					coroutine.yield()
+				else
+					locked=true
+				end
+
+				return function()
+					if #queue > 0 then
+						coroutine.resume(table.remove(queue, 1))
+					else
+						locked=false
+					end
+				end
+			end
+		end
+	end
+
+	local Argument={}
+	Argument.__index=Argument
+	do
+		function Argument.new(command, argumentObject, value)
+			local self={
+				Command=command; -- The command that owns this argument
+				Type=nil; -- The type definition
+				Name=argumentObject.Name; -- The name for this specific argument
+				Object=argumentObject; -- The raw ArgumentObject (definition)
+				Required=argumentObject.Default == nil and argumentObject.Optional ~= true; -- If the argument is required or not.
+				Executor=command.Executor; -- The player who is running the command
+				RawValue=value; -- The raw, unparsed value
+				RawSegments={}; -- The raw, unparsed segments (if the raw value was comma-sep)
+				TransformedValues={}; -- The transformed value (generated later)
+				Prefix=""; -- The prefix for this command (%Team)
+				TextSegmentInProgress=""; -- The text of the raw segment the user is currently typing.
+				RawSegmentsAreAutocomplete=false;
+			}
+
+			if type(argumentObject.Type) == "table" then
+				self.Type=argumentObject.Type
+			else
+				local parsedType, parsedRawValue, prefix=Util.ParsePrefixedUnionType(
+					command.Registry:GetTypeName(argumentObject.Type),
+					value
+				)
+
+				self.Type=command.Registry:GetType(parsedType)
+				self.RawValue=parsedRawValue
+				self.Prefix=prefix
+
+				if self.Type == nil then
+					error(string.format("[CmdrYield]: Argument %s has an unregistered type %q", self.Name or "<none>", parsedType or "<none>"))
+				end
+			end
+
+			setmetatable(self, Argument)
+
+			self:Transform()
+
+			return self
+		end
+
+		function Argument:GetDefaultAutocomplete()
+			if self.Type.Autocomplete then
+				local strings, options=self.Type.Autocomplete(self:TransformSegment(""))
+				return strings, options or {}
+			end
+
+			return {}
+		end
+
+		function Argument:Transform()
+			if #self.TransformedValues ~= 0 then
+				return
+			end
+
+			local rawValue=self.RawValue
+			if self.Type.ArgumentOperatorAliases then
+				rawValue=self.Type.ArgumentOperatorAliases[rawValue] or rawValue
+			end
+
+			if rawValue == "." and self.Type.Default then
+				rawValue=self.Type.Default(self.Executor) or ""
+				self.RawSegmentsAreAutocomplete=true
+			end
+
+			if rawValue == "?" and self.Type.Autocomplete then
+				local strings, options=self:GetDefaultAutocomplete()
+
+				if not options.IsPartial and #strings > 0 then
+					rawValue=strings[math.random(1, #strings)]
+					self.RawSegmentsAreAutocomplete=true
+				end
+
+			end
+
+			if self.Type.Listable and #self.RawValue > 0 then
+				local randomMatch=rawValue:match("^%?(%d+)$")
+				if randomMatch then
+					local maxSize=tonumber(randomMatch)
+
+					if maxSize and maxSize > 0 then
+						local items={}
+						local remainingItems, options=self:GetDefaultAutocomplete()
+
+						if not options.IsPartial and #remainingItems > 0 then
+							for _=1, math.min(maxSize, #remainingItems) do
+								table.insert(items, table.remove(remainingItems, math.random(1, #remainingItems)))
+							end
+
+							rawValue=table.concat(items, ",")
+							self.RawSegmentsAreAutocomplete=true
+						end
+					end
+				elseif rawValue == "*" or rawValue == "**" then
+					local strings, options=self:GetDefaultAutocomplete()
+
+					if not options.IsPartial and #strings > 0 then
+						if rawValue == "**" and self.Type.Default then
+							local defaultString=self.Type.Default(self.Executor) or ""
+
+							for i, string in ipairs(strings) do
+								if string == defaultString then
+									table.remove(strings, i)
+								end
+							end
+						end
+
+						rawValue=table.concat(
+							strings,
+							","
+						)
+						self.RawSegmentsAreAutocomplete=true
+					end
+				end
+
+				rawValue=Strs.UnescapeOperators(rawValue)
+
+				local rawSegments=Strs.SplitSimple(rawValue,",")
+
+				if #rawSegments == 0 then
+					rawSegments={""}
+				end
+
+				if rawValue:sub(#rawValue, #rawValue) == "," then
+					rawSegments[#rawSegments + 1]="" -- makes auto complete tick over right after pressing ,
+				end
+
+				for i, rawSegment in ipairs(rawSegments) do
+					self.RawSegments[i]=rawSegment
+					self.TransformedValues[i]={ self:TransformSegment(rawSegment) }
+				end
+
+				self.TextSegmentInProgress=rawSegments[#rawSegments]
+			else
+				rawValue=Strs.UnescapeOperators(rawValue)
+
+				self.RawSegments[1]=Strs.UnescapeOperators(rawValue)
+				self.TransformedValues[1]={ self:TransformSegment(rawValue) }
+				self.TextSegmentInProgress=self.RawValue
+			end
+		end
+
+		function Argument:TransformSegment(rawSegment)
+			if self.Type.Transform then
+				return self.Type.Transform(rawSegment, self.Executor)
+			else
+				return rawSegment
+			end
+		end
+
+		--- Returns whatever the Transform method gave us.
+		function Argument:GetTransformedValue(segment)
+			return unpack(self.TransformedValues[segment])
+		end
+
+		--- Validates that the argument will work without any type errors.
+		function Argument:Validate(isFinal)
+			if self.RawValue == nil or #self.RawValue == 0 and self.Required == false then
+				return true
+			end
+
+			if self.Required and (self.RawSegments[1] == nil or #self.RawSegments[1] == 0) then
+				return false, "This argument is required."
+			end
+
+			if self.Type.Validate or self.Type.ValidateOnce then
+				for i=1, #self.TransformedValues do
+					if self.Type.Validate then
+						local valid, errorText=self.Type.Validate(self:GetTransformedValue(i))
+
+						if not valid then
+							return valid, errorText or "Invalid value"
+						end
+					end
+
+					if isFinal and self.Type.ValidateOnce then
+						local validOnce, errorTextOnce=self.Type.ValidateOnce(self:GetTransformedValue(i))
+
+						if not validOnce then
+							return validOnce, errorTextOnce
+						end
+					end
+				end
+
+				return true
+			else
+				return true
+			end
+		end
+
+		--- Gets a list of all possible values that could match based on the current value.
+		function Argument:GetAutocomplete()
+			if self.Type.Autocomplete then
+				return self.Type.Autocomplete(self:GetTransformedValue(#self.TransformedValues))
+			else
+				return {}
+			end
+		end
+
+		function Argument:ParseValue(i)
+			if self.Type.Parse then
+				return self.Type.Parse(self:GetTransformedValue(i))
+			else
+				return self:GetTransformedValue(i)
+			end
+		end
+
+		--- Returns the final value of the argument.
+		function Argument:GetValue()
+			if #self.RawValue == 0 and not self.Required and self.Object.Default ~= nil then
+				return self.Object.Default
+			end
+
+			if not self.Type.Listable then
+				return self:ParseValue(1)
+			end
+
+			local values={}
+
+			for i=1, #self.TransformedValues do
+				local parsedValue=self:ParseValue(i)
+
+				if type(parsedValue) ~= "table" then
+					error(("[CmdrYield]: Argument Listable types must return a table from Parse (%s)"):format(self.Type.Name))
+				end
+
+				for _, value in pairs(parsedValue) do
+					values[value]=true -- Put them into a dictionary to ensure uniqueness
+				end
+			end
+
+			local valueArray={}
+
+			for value in pairs(values) do
+				valueArray[#valueArray + 1]=value
+			end
+
+			return valueArray
+		end
+
+	end
+
+	local Command={}
+	Command.__index=Command
+	do
+		function Command.new(options)
+			local self={
+				Dispatcher=options.Dispatcher; -- The dispatcher that created this command context
+				Registry=options.Registry; -- The registry that created this command context
+				Window=options.Window; -- The registry that created this command context
+				Cmdr=options.Dispatcher.Cmdr; -- A quick reference to Cmdr for command context
+				Name=options.CommandObject.Name; -- The command name (not alias)
+				RawText=options.Text; -- The raw text used to trigger this command
+				Object=options.CommandObject; -- The command object (definition)
+				Group=options.CommandObject.Group; -- The group this command is in
+				State={}; -- A table which will hold any custom command state information
+				Aliases=options.CommandObject.Aliases;
+				Alias=options.Alias; -- The command name that was used
+				Description=options.CommandObject.Description;
+				Executor=options.Executor; -- The player who ran the command
+				ArgumentDefinitions=options.CommandObject.Args; -- The argument definitions from the command definition
+				RawArguments=options.Arguments; -- Array of strings which are the unparsed values for the arguments
+				Arguments={}; -- A table which will hold ArgumentContexts for each argument
+				Data=options.Data; -- A special container for any additional data the command needs to collect from the client
+				Response=nil; -- Will be set at the very end when the command is run and a string is returned from the Run function.
+			}
+
+			setmetatable(self, Command)
+
+			return self
+		end
+
+		function Command:Parse(allowIncompleteArguments)
+			local hadOptional=false
+			for i, definition in ipairs(self.ArgumentDefinitions) do
+				if type(definition) == "function" then
+					definition=definition(self)
+
+					if definition == nil then
+						break
+					end
+				end
+
+				local required=(definition.Default == nil and definition.Optional ~= true)
+
+				if required and hadOptional then
+					error(("[CmdrYield]: Command %q: Required arguments cannot occur after optional arguments."):format(self.Name))
+				elseif not required then
+					hadOptional=true
+				end
+
+				if self.RawArguments[i] == nil and required and allowIncompleteArguments ~= true then
+					return false, ("Required argument #%d %s is missing."):format(i, definition.Name)
+				elseif self.RawArguments[i] or allowIncompleteArguments then
+					self.Arguments[i]=Argument.new(self, definition, self.RawArguments[i] or "")
+				end
+			end
+
+			return true
+		end
+
+		function Command:Validate(isFinal)
+			self._Validated=true
+			local errorText=""
+			local success=true
+
+			for i, arg in pairs(self.Arguments) do
+				local argSuccess, argErrorText=arg:Validate(isFinal)
+
+				if not argSuccess then
+					success=false
+					errorText=("%s; #%d %s: %s"):format(errorText, i, arg.Name, argErrorText or "error")
+				end
+			end
+
+			return success, errorText:sub(3)
+		end
+
+		function Command:GetLastArgument()
+			for i=#self.Arguments, 1, -1 do
+				if self.Arguments[i].RawValue then
+					return self.Arguments[i]
+				end
+			end
+		end
+
+		function Command:GatherArgumentValues ()
+			local values={}
+
+			for i=1, #self.ArgumentDefinitions do
+				local arg=self.Arguments[i]
+				if arg then
+					values[i]=arg:GetValue()
+				elseif type(self.ArgumentDefinitions[i]) == "table" then
+					values[i]=self.ArgumentDefinitions[i].Default
+				end
+			end
+
+			return values, #self.ArgumentDefinitions
+		end
+		
+		function Command:Reply(...)
+			return self.Registry:SendEvent("AddLine",...)
+		end
+		
+		function Command:Run()
+			if self._Validated == nil then
+				error("Must validate a command before running.")
+			end
+
+			if self.Object.Data and self.Data == nil then
+				local values, length=self:GatherArgumentValues()
+				self.Data=self.Object.Data(self, unpack(values, 1, length))
+			end
+
+			if self.Response == nil then
+				if self.Object.Run then -- We can just Run it here on this machine
+					
+					local values, length=self:GatherArgumentValues()
+					self.Response=self.Object.Run(self, unpack(values, 1, length))
+				end
+			end
+
+			--local afterRunHook=self.Dispatcher:RunHooks("AfterRun", self)
+			--if afterRunHook then
+			--	return afterRunHook
+			--else
+			return self.Response
+			--end
+		end
+
+		function Command:GetArgument (index)
+			return self.Arguments[index]
+		end
+
+		function Command:GetData ()
+			if self.Data then
+				return self.Data
+			end
+
+			if self.Object.Data then
+				self.Data=self.Object.Data(self)
+			end
+
+			return self.Data
+		end
+
+		--function Command:SendEvent(player, event, ...)
+		--	assert(typeof(player) == "Instance", "Argument #1 must be a Player")
+		--	assert(player:IsA("Player"), "Argument #1 must be a Player")
+		--	assert(type(event) == "string", "Argument #2 must be a string")
+
+		--	if IsServer then
+		--		self.Dispatcher.Cmdr.RemoteEvent:FireClient(player, event, ...)
+		--	elseif self.Dispatcher.Cmdr.Events[event] then
+		--		assert(player == Players.LocalPlayer, "Event messages can only be sent to the local player on the client.")
+		--		self.Dispatcher.Cmdr.Events[event](...)
+		--	end
+		--end
+
+		----- Sends an event message to all players
+		--function Command:BroadcastEvent(...)
+		--	if not IsServer then
+		--		error("Can't broadcast event messages from the client.", 2)
+		--	end
+
+		--	self.Dispatcher.Cmdr.RemoteEvent:FireAllClients(...)
+		--end
+
+		----- Alias of Registry:GetStore(...)
+		--function Command:GetStore(...)
+		--	return self.Dispatcher.Cmdr.Registry:GetStore(...)
+		--end
+
+		----- Returns true if the command has an implementation on the caller's machine.
+		--function Command:HasImplementation()
+		--	return ((RunService:IsClient() and self.Object.ClientRun) or self.Object.Run) and true or false
+		--end
+	end
+
+	local Dispatcher={
+		Registry=nil,
+		Window=nil
+	}
+	do 
+		local History={}
+
+		function Dispatcher:Evaluate(text, executor, allowIncompleteArguments, data)
+			if executor ~= Players.LocalPlayer then
+				error("Can't evaluate a command that isn't sent by the local player.")
+			end
+
+			local arguments=Strs.Split(text)
+			local commandName=table.remove(arguments, 1)
+			local commandObject=self.Registry:GetCommand(commandName)
+
+			if commandObject then
+				arguments=Util.MashExcessArguments(arguments, #commandObject.Args)
+
+				local command=Command.new({
+					Dispatcher=self,
+					Registry=self.Registry,
+					Window=self.Window,
+					Text=text,
+					CommandObject=commandObject,
+					Alias=commandName,
+					Executor=executor,
+					Arguments=arguments,
+					Data=data
+				})
+
+				local success, errorText=command:Parse(allowIncompleteArguments)
+				if success then
+					return command
+				else
+					return false, errorText
+				end
+			else
+				return false, ("%q is not a valid command name. Use the help command to see all available commands."):format(tostring(commandName))
+			end
+		end
+
+		function Dispatcher:Execute(text, executor, options)
+			executor=executor or LocalPlayer
+			options=options or {}
+
+			self:PushHistory(text)
+
+			local command, result=self:Evaluate(text, executor, nil, options.Data)
+			if not command then return result end
+
+			local ok, out=xpcall(function()
+				local valid, result=command:Validate(true) -- luacheck: ignore
+
+				if not valid then return result end
+
+				return command:Run() or "Command executed."
+			end, function(value)
+				return debug.traceback(tostring(value))
+			end)
+
+			if not ok then
+				warn(("[CmdrYield]: Dispatcher Error occurred while evaluating command string %q\n%s"):format(text, tostring(out)))
+			end
+
+			return ok and out or "An error occurred while running this command. Check the console for more information."
+		end
+
+		function Dispatcher:PushHistory(text)
+			if Strs.Trim(text) == "" or text == History[#History] then
+				return
+			end
+
+			History[#History + 1]=text
+		end
+
+		function Dispatcher:GetHistory()
+			return History
+		end
+		
+		function Dispatcher:Run(...)
+			local args={...}
+			local text=args[1]
+
+			for i=2,#args do
+				text=text.." "..tostring(args[i])
+			end
+
+			local command,errorText=self:Evaluate(text,Players.LocalPlayer)
+			if not command then
+				error(errorText)
+			end
+
+			local success, errorText=command:Validate(true) -- luacheck: ignore
+
+			if not success then
+				error(errorText)
+			end
+
+			return command:Run()
+		end
+	end
+
+	local Registry={
+		TypeMethods=Util.MakeDictionary({"Transform", "Validate", "Autocomplete", "Parse", "DisplayName", "Listable", "ValidateOnce", "Prefixes", "Default", "ArgumentOperatorAliases"});
+		CommandMethods=Util.MakeDictionary({"Name", "Aliases", "AutoExec", "Description", "Args", "Run", "ClientRun", "Data", "Group"});
+		CommandArgProps=Util.MakeDictionary({"Name", "Type", "Description", "Optional", "Default"});
+		Types={};
+		TypeAliases={};
+		Commands={};
+		CommandsList={};
+		Events={},
+		Hooks={
+			BeforeRun={};
+			AfterRun={}
+		};
+		Stores=setmetatable({}, {
+			__index=function (self, k)
+				self[k]={}
+				return self[k]
+			end
+		});
+		AutoExecBuffer={};
+		Window=nil
+	}
+	do
+		function Registry:RegisterType(name,typeObject)
+			if not name or typeof(name) ~= "string" then
+				error("[CmdrYield]: Registry Invalid type name provided: nil")
+			end
+
+			if not string.find(name,"^[%d%l]%w*$") then
+				error(('[CmdrYield]: Registry Invalid type name provided: "%s", type names must be alphanumeric and start with a lower-case letter or a digit.'):format(name))
+			end
+
+			for key in pairs(typeObject) do
+				if self.TypeMethods[key] == nil then
+					error("[CmdrYield]: Registry Unknown key/method in type \"" .. name .. "\": " .. key)
+				end
+			end
+
+			if self.Types[name] ~= nil then
+				error(('[CmdrYield]: Registry Type "%s" has already been registered.'):format(name))
+			end
+
+			typeObject.Name=name
+			typeObject.DisplayName=typeObject.DisplayName or name
+
+			self.Types[name]=typeObject
+
+			if typeObject.Prefixes then
+				self:RegisterTypePrefix(name, typeObject.Prefixes)
+			end
+		end
+
+		function Registry:RegisterTypePrefix(name, union)
+			if not self.TypeAliases[name] then
+				self.TypeAliases[name]=name
+			end
+
+			self.TypeAliases[name]=("%s %s"):format(self.TypeAliases[name], union)
+		end
+
+		--function Registry:RegisterTypeAlias (name, alias)
+		--	assert(self.TypeAliases[name] == nil, ("Type alias %s already exists!"):format(alias))
+		--	self.TypeAliases[name]=alias
+		--end
+
+		function Registry:RegisterTypesIn(container)
+			if type(container)=="table" then
+				for k,func in pairs(container) do
+					if type(func)=="function" then
+						pcall(func,{["Registry"]=self,["Util"]=Util})
+					end
+				end
+			end
+		end
+		
+		function Registry:RegisterCommand(command:{[string]:any})
+			assert(type(command)=="table",`[CmdrYield]: Registry Invalid argument command (table expected, got {type(command)})`)
+
+			for k in pairs(command) do
+				if self.CommandMethods[k] == nil then
+					warn("[CmdrYield]: Registry Unknown key/method in command " .. (command.Name or "unknown command") .. ": " .. k)
+					return
+				end
+			end
+
+			if command.Args then
+				for i, v in pairs(command.Args) do
+					if type(v) == "table" then
+						for k in pairs(v) do
+							if self.CommandArgProps[k] == nil then
+								error(`[CmdrYield]: Registry Unknown property in command {command.Name or "unknown"} argument {i}: {k}`)
+								return
+							end
+						end
+					end
+				end
+			end
+
+			if command.AutoExec and IsClient then
+				table.insert(self.AutoExecBuffer, command.AutoExec)
+				self:FlushAutoExecBufferDeferred()
+			end
+
+			local oldCommand=self.Commands[command.Name:lower()]
+			if oldCommand and type(oldCommand.Aliases)=="table" then
+				for _, alias in pairs(oldCommand.Aliases) do
+					self.Commands[alias:lower()]=nil
+				end
+			elseif not oldCommand then
+				table.insert(self.CommandsList, command)
+			end
+
+			self.Commands[command.Name:lower()]=command
+
+			if type(command.Aliases)=="table" then
+				for _, alias in pairs(command.Aliases) do
+					self.Commands[alias:lower()]=command
+				end
+			end
+		end
+			
+		function Registry:RegisterCommandsIn(container)
+			if type(container)=="table" then
+				for k,v in pairs(container) do
+					self:RegisterCommand(v)
+				end
+			end
+		end
+		
+		function Registry:BindEvent(name,callback)
+			self.Events[name]=callback
+		end
+		
+		function Registry:BindEventsIn(container)
+			if type(container)=="table" then
+				for k,func in pairs(container) do
+					if type(func)=="function" then
+						pcall(func,{["Registry"]=self,["Util"]=Util,["Window"]=self.Window})
+					end
+				end
+			end
+		end
+		
+		function Registry:SendEvent(name,...)
+			self.Events[name](...)
+		end
+
+		function Registry:GetCommand(name)
+			name=name or ""
+			return self.Commands[name:lower()]
+		end
+
+		function Registry:GetCommands()
+			return self.CommandsList
+		end
+
+		function Registry:GetCommandNames()
+			local commands={}
+
+			for _, command in pairs(self.CommandsList) do
+				table.insert(commands, command.Name)
+			end
+
+			return commands
+		end
+
+		function Registry:GetTypeNames ()
+			local typeNames={}
+
+			for typeName in pairs(self.Types) do
+				table.insert(typeNames, typeName)
+			end
+
+			return typeNames
+		end
+
+		function Registry:GetType(name)
+			return self.Types[name]
+		end
+
+		function Registry:GetTypeName(name)
+			return self.TypeAliases[name] or name
+		end
+
+		function Registry:FlushAutoExecBufferDeferred()
+			if self.AutoExecFlushConnection then
+				return
+			end
+
+			self.AutoExecFlushConnection=RunService.Heartbeat:Connect(function()
+				self.AutoExecFlushConnection:Disconnect()
+				self.AutoExecFlushConnection=nil
+				self:FlushAutoExecBuffer()
+			end)
+		end
+
+		function Registry:FlushAutoExecBuffer()
+			for _, commandGroup in ipairs(self.AutoExecBuffer) do
+				for _, command in ipairs(commandGroup) do
+					Dispatcher:Execute(command)
+				end
+			end
+
+			self.AutoExecBuffer={}
+		end
+	end
+	
+	Registry:RegisterCommandsIn(DefaultCommands)
+	Registry:RegisterTypesIn(DefaultTypes)
+	Registry:BindEventsIn(DefaultEvents)
+	
+	local AutoComplete={
+		Items={},
+		ItemOptions={},
+		SelectedItem=0,
+	}
+	do 
+		local AutoItem=SecondFrame:FindFirstChild("TextButton")
+		local Title=SecondFrame:FindFirstChild("Title")
+		local Description=SecondFrame:FindFirstChild("Description")
+
+		AutoItem.Parent=nil
+
+		local DefaultBarThickness=SecondFrame.ScrollBarThickness
+
+		local function SetText(obj, textObj, text, sizeFromContents)
+			obj.Visible=text ~= nil
+			textObj.Text=text or ""
+
+			if sizeFromContents then
+				textObj.Size=UDim2.new(
+					0,
+					Util.GetTextSize(text or "", textObj, Vector2.new(1000, 1000), 1, 0).X,
+					obj.Size.Y.Scale,
+					obj.Size.Y.Offset
+				)
+			end
+		end
+
+		local function UpdateContainerSize()
+			SecondFrame.Size=UDim2.new(
+				0,
+				math.max(Title.Field.TextBounds.X + Title.Field.Type.TextBounds.X, SecondFrame.Size.X.Offset),
+				0,
+				math.min(SecondFrame.UIListLayout.AbsoluteContentSize.Y, SecondFrame.Parent.AbsoluteSize.Y - SecondFrame.AbsolutePosition.Y - 10)
+			)
+		end
+
+		local function UpdateInfoDisplay(options)
+			-- Update the objects' text and sizes
+			SetText(Title, Title.Field, options.name, true)
+			SetText(
+				Title.Field.Type,
+				Title.Field.Type,
+				options.type and ": " .. options.type:sub(1, 1):upper() .. options.type:sub(2)
+			)
+			SetText(Description, Description.Label, options.description)
+
+			if options.invalid then
+				warn("UpdateInfoDisplay is False",options.name)
+			end
+
+			Description.Label.TextColor3=options.invalid and Color3.fromRGB(255, 73, 73) or Color3.fromRGB(255, 255, 255)
+			Description.Size=UDim2.new(1, 0, 0, 40)
+
+			-- Flow description text
+			while not Description.Label.TextFits do
+				Description.Size=Description.Size + UDim2.new(0, 0, 0, 2)
+
+				if Description.Size.Y.Offset > 500 then
+					break
+				end
+			end
+
+			-- Update container
+			task.wait()
+			SecondFrame.UIListLayout:ApplyLayout()
+			UpdateContainerSize()
+			SecondFrame.ScrollBarThickness=DefaultBarThickness
+		end
+
+		function AutoComplete:Show(items, options)
+			options=options or {}
+
+			for _, item in pairs(self.Items) do
+				if item.gui then
+					item.gui:Destroy()
+				end
+			end
+
+			self.SelectedItem=1
+			self.Items=items
+			self.Prefix=options.prefix or ""
+			self.LastItem=options.isLast or false
+			self.Command=options.command
+			self.Arg=options.arg
+			self.NumArgs=options.numArgs
+			self.IsPartial=options.isPartial
+
+			local autocompleteWidth=200
+
+			SecondFrame.ScrollBarThickness=0
+
+			for i, item in pairs(self.Items) do
+				local leftText=item[1]
+				local rightText=item[2]
+
+				local btn=AutoItem:Clone()
+				btn.Name=leftText .. rightText
+				btn.BackgroundTransparency=i == self.SelectedItem and 0.5 or 1
+
+				local start, stop=string.find(rightText:lower(), leftText:lower(), 1, true)
+				btn.Typed.Text=string.rep(" ", start - 1) .. leftText
+				btn.Suggest.Text=string.sub(rightText, 0, start - 1)
+					.. string.rep(" ", #leftText)
+					.. string.sub(rightText, stop + 1)
+
+
+				btn.Parent=SecondFrame
+				btn.LayoutOrder=i
+
+				local maxBounds=math.max(btn.Typed.TextBounds.X, btn.Suggest.TextBounds.X) + 20
+				if maxBounds > autocompleteWidth then
+					autocompleteWidth=maxBounds
+				end
+
+				item.gui=btn
+			end
+
+			SecondFrame.UIListLayout:ApplyLayout()
+
+			local text=Entry.TextBox.Text
+			local words=Strs.Split(text)
+			if text:sub(#text, #text) == " " and not options.at then
+				words[#words + 1]="e"
+			end
+			table.remove(words, #words)
+			local extra=(options.at and options.at or (#table.concat(words, " ") + 1)) * 7
+
+			SecondFrame.Position =
+				UDim2.new(0, Entry.TextBox.AbsolutePosition.X - 10 + extra, 0, Entry.TextBox.AbsolutePosition.Y + 30)
+			SecondFrame.Size=UDim2.new(0, autocompleteWidth, 0, SecondFrame.UIListLayout.AbsoluteContentSize.Y)
+			SecondFrame.Visible=true
+
+			UpdateInfoDisplay(self.Items[1] and self.Items[1].options or options)
+		end
+
+		function AutoComplete:GetSelectedItem()
+			if SecondFrame.Visible == false then
+				return nil
+			end
+
+			return AutoComplete.Items[AutoComplete.SelectedItem]
+		end
+
+		function AutoComplete:Hide()
+			SecondFrame.Visible=false
+		end
+
+		function AutoComplete:IsVisible()
+			return SecondFrame.Visible
+		end
+
+		--- Changes the user's item selection by the given delta
+		function AutoComplete:Select(delta)
+			if not self:IsVisible() then
+				return
+			end
+
+			self.SelectedItem=self.SelectedItem + delta
+
+			if self.SelectedItem > #self.Items then
+				self.SelectedItem=1
+			elseif self.SelectedItem < 1 then
+				self.SelectedItem=#self.Items
+			end
+
+			for i, item in pairs(self.Items) do
+				warn(item)
+				item.gui.BackgroundTransparency=i == self.SelectedItem and 0.5 or 1
+			end
+
+			SecondFrame.CanvasPosition=Vector2.new(
+				0,
+				math.max(
+					0,
+					Title.Size.Y.Offset + Description.Size.Y.Offset + self.SelectedItem * AutoItem.Size.Y.Offset - SecondFrame.Size.Y.Offset
+				)
+			)
+
+			if self.Items[self.SelectedItem] and self.Items[self.SelectedItem].options then
+				UpdateInfoDisplay(self.Items[self.SelectedItem].options or {})
+			end
+		end
+
+		SecondFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(UpdateContainerSize)
+	end
+
+	Dispatcher.Registry=Registry
+
+	local Window={
+		Valid=false,
+		ErrorText="",
+		HistoryState=nil,
+	}
+	Registry.Window=Window
+	
+	do
+		local function ProcessEntry(text)
+			text=Strs.Trim(text)
+			if #text == 0 then return end
+			Window:AddLine(Window:GetLabel() .. " " .. text, Color3.fromRGB(255, 223, 93))
+			Window:AddLine(Dispatcher:Execute(text, LocalPlayer, {IsHuman=true}))
+		end
+
+		local function OnTextChanged(text)
+			local command=Dispatcher:Evaluate(text, LocalPlayer, true)
+			local arguments=Strs.Split(text)
+			local commandText=table.remove(arguments, 1)
+			local atEnd=false
+
+			if command then
+				arguments=Util.MashExcessArguments(arguments, #command.Object.Args)
+				atEnd=#arguments == #command.Object.Args
+			end
+
+			local entryComplete=commandText and #arguments > 0
+
+			if string.match(string.sub(text,#text,#text),"%s") and not atEnd then
+				entryComplete=true
+				arguments[#arguments + 1]=""
+			end
+
+			if command and entryComplete then
+				local commandValid, errorText=command:Validate()
+
+				Window:SetValid(commandValid, ("Validation errors: %s"):format(errorText or ""))
+
+				local acItems={}
+
+				local lastArgument=command:GetArgument(#arguments)
+				if lastArgument then
+					local typedText=lastArgument.TextSegmentInProgress
+
+					local isPartial=false
+					if lastArgument.RawSegmentsAreAutocomplete then
+						for i, segment in ipairs(lastArgument.RawSegments) do
+							acItems[i]={segment, segment}
+						end
+					else
+						local items, options=lastArgument:GetAutocomplete()
+						options=options or {}
+						isPartial=options.IsPartial or false
+
+						for i, item in pairs(items) do
+							acItems[i]={typedText, item}
+						end
+					end
+
+					local valid=true
+
+					if #typedText > 0 then
+						valid, errorText=lastArgument:Validate()
+					end
+
+					if not atEnd and valid then
+						Window:HideInvalidState()
+					end
+
+					AutoComplete:Show(acItems, {
+						at=atEnd and #text - #typedText + (text:sub(#text, #text):match("%s") and -1 or 0);
+						prefix=#lastArgument.RawSegments == 1 and lastArgument.Prefix or "";
+						isLast=#command.Arguments == #command.ArgumentDefinitions and #typedText > 0;
+						numArgs=#arguments;
+						command=command;
+						arg=lastArgument;
+						name=lastArgument.Name .. (lastArgument.Required and "" or "?");
+						type=lastArgument.Type.DisplayName;
+						description=(valid == false and errorText) or lastArgument.Object.Description;
+						invalid=not valid;
+						isPartial=isPartial;
+					})
+
+					return
+				end
+			elseif commandText and #arguments == 0 then
+				Window:SetValid(true)
+
+				local exactCommand=Registry:GetCommand(commandText)
+				local exactMatch
+				if exactCommand then
+					exactMatch={exactCommand.Name, exactCommand.Name, options={
+						name=exactCommand.Name;
+						description=exactCommand.Description;
+					}}
+
+					local arg=exactCommand.Args and exactCommand.Args[1]
+
+					if type(arg) == "function" then
+						arg=arg(command)
+					end
+
+					if arg and (not arg.Optional and arg.Default == nil) then
+						Window:SetValid(false, "This command has required arguments.")
+						Window:HideInvalidState()
+					end
+				else
+					Window:SetValid(false, `{commandText} is not a valid command name. Use the help command to see all available commands.`)
+				end
+
+				local acItems={exactMatch}
+				for _, cmd in pairs(Registry:GetCommandNames()) do
+					if commandText:lower() == cmd:lower():sub(1, #commandText) and (exactMatch == nil or exactMatch[1] ~= commandText) then
+						local commandObject=Registry:GetCommand(cmd)
+						acItems[#acItems + 1]={commandText, cmd, options={
+							name=commandObject.Name;
+							description=commandObject.Description;
+						}}
+					end
+				end
+
+				AutoComplete:Show(acItems)
+
+				return 
+			end
+
+			Window:SetValid(false, "Use the help command to see all available commands.")
+			AutoComplete:Hide()
+		end
+
+		function Window:ApplyTitle()
+			Entry.TextLabel.Text=LocalPlayer.Name .. "@Cmdr$"
+		end
+
+		function Window:GetLabel()
+			return Entry.TextLabel.Text
+		end
+
+		function Window:ApplyWindowHeight()
+			local windowHeight=MainFrame.UIListLayout.AbsoluteContentSize.Y + MainFrame.UIPadding.PaddingTop.Offset + MainFrame.UIPadding.PaddingBottom.Offset
+			MainFrame.Size=UDim2.new(MainFrame.Size.X.Scale, MainFrame.Size.X.Offset, 0, math.clamp(windowHeight, 0, WINDOW_MAX_HEIGHT))
+			MainFrame.CanvasPosition=Vector2.new(0, windowHeight)
+		end
+
+		function Window:AddLine(text, options)
+			options=options or {}
+			text=tostring(text)
+
+			local optionsType=typeof(options)
+			if optionsType == "Color3" then
+				options={ Color=options }
+			elseif optionsType ~= "table" then
+				options={}
+			end
+
+			if #text == 0 then
+				Window:ApplyWindowHeight()
+				return
+			end
+
+			local s=Strs.EmulateTabstops(text or "nil", 8)
+
+			local line=Line:Clone()
+			line.Text=s
+			line.TextColor3=options.Color or line.TextColor3
+			line.RichText=options.RichText or false
+			line.Parent=MainFrame
+
+			Window:ApplyWindowHeight()
+		end
+
+		function Window:IsVisible()
+			return MainFrame.Visible
+		end
+
+		function Window:SetValid(valid,errorText)
+			Entry.TextBox.TextColor3=valid and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(255, 73, 73)
+			self.Valid=valid
+			self.ErrorText=errorText
+		end
+
+		function Window:LoseFocus(submit)
+			local text=Entry.TextBox.Text
+
+			self:ClearHistoryState()
+
+			if MainFrame.Visible and not GuiService.MenuIsOpen then
+				self:SetEntryText("")
+				Entry.TextBox:CaptureFocus()
+			elseif GuiService.MenuIsOpen and MainFrame.Visible then
+				self:Hide()
+			end
+
+			if submit and self.Valid then
+				self:SetEntryText("")
+				ProcessEntry(text)
+			elseif submit then
+				self:AddLine(self.ErrorText, Color3.fromRGB(255, 153, 153))
+			end
+		end
+
+		function Window:Hide()
+			return self:SetVisible(false)
+		end
+
+		function Window:Show()
+			return self:SetVisible(true)
+		end
+
+		function Window:SetVisible(visible)
+			MainFrame.Visible=visible
+
+			if visible then
+				self.PreviousChatWindowConfigurationEnabled=TextChatService.ChatWindowConfiguration.Enabled
+				self.PreviousChatInputBarConfigurationEnabled=TextChatService.ChatInputBarConfiguration.Enabled
+				TextChatService.ChatWindowConfiguration.Enabled=false
+				TextChatService.ChatInputBarConfiguration.Enabled=false
+
+				Entry.TextBox:CaptureFocus()
+				self:SetEntryText("")
+
+				--if self.Cmdr.ActivationUnlocksMouse then
+				--	self.PreviousMouseBehavior=UserInputService.MouseBehavior
+				--	UserInputService.MouseBehavior=Enum.MouseBehavior.Default
+				--end
+			else
+				TextChatService.ChatWindowConfiguration.Enabled=if self.PreviousChatWindowConfigurationEnabled ~= nil then 
+					self.PreviousChatWindowConfigurationEnabled else true
+				TextChatService.ChatInputBarConfiguration.Enabled=if self.PreviousChatInputBarConfigurationEnabled ~= nil then 
+					self.PreviousChatInputBarConfigurationEnabled else true
+
+				Entry.TextBox:ReleaseFocus()
+				AutoComplete:Hide()
+
+				if self.PreviousMouseBehavior then
+					UserInputService.MouseBehavior=self.PreviousMouseBehavior
+					self.PreviousMouseBehavior=nil
+				end
+			end
+		end
+
+		function Window:SetEntryText(text)
+			Entry.TextBox.Text=text
+
+			if self:IsVisible() then
+				Entry.TextBox:CaptureFocus()
+				Entry.TextBox.CursorPosition=#text + 1
+				self:ApplyWindowHeight()
+			end
+		end
+
+		function Window:GetEntryText()
+			return Entry.TextBox.Text:gsub("\t", "")
+		end
+
+		function Window:HideInvalidState()
+			Entry.TextBox.TextColor3=Color3.fromRGB(255, 255, 255)
+		end
+
+		function Window:TraverseHistory(delta)
+			local history=Dispatcher:GetHistory()
+
+			if self.HistoryState == nil then
+				self.HistoryState={
+					Position=#history + 1,
+					InitialText=self:GetEntryText(),
+				}
+			end
+
+			self.HistoryState.Position=math.clamp(self.HistoryState.Position + delta, 1, #history + 1)
+
+			self:SetEntryText(
+				self.HistoryState.Position == #history + 1 and self.HistoryState.InitialText
+					or history[self.HistoryState.Position]
+			)
+		end
+
+		function Window:ClearHistoryState()
+			self.HistoryState=nil
+		end
+
+		function Window:SelectVertical(delta)
+			if AutoComplete:IsVisible() and not self.HistoryState then
+				AutoComplete:Select(delta)
+			else
+				self:TraverseHistory(delta)
+			end
+		end
+
+		local LastPressTime,PressCount=0,0
+
+		local function ApplyActive()
+			Window:SetVisible(not Window:IsVisible())
+			Window:SetEntryText("")
+
+			if GuiService.MenuIsOpen then
+				Window:Hide()
+			end
+		end
+
+		function Window:BeginInput(input, typing)
+			if GuiService.MenuIsOpen then
+				self:Hide()
+			end
+
+			if typing and not self:IsVisible() then
+				return
+			end
+
+			if input.KeyCode == Enum.KeyCode.F3 then 
+				ApplyActive()
+				return
+			end
+
+			if not self:IsVisible() then
+				return
+			end
+
+			if table.find(MOUSE_TOUCH_ENUM, input.UserInputType) then
+				local ps=input.Position
+				local ap=MainFrame.AbsolutePosition
+				local as=MainFrame.AbsoluteSize
+				if ps.X < ap.X or ps.X > ap.X + as.X or ps.Y < ap.Y or ps.Y > ap.Y + as.Y then
+					self:Hide()
+				end
+			elseif input.KeyCode == Enum.KeyCode.Down then -- Auto Complete Down
+				self:SelectVertical(1)
+			elseif input.KeyCode == Enum.KeyCode.Up then -- Auto Complete Up
+				self:SelectVertical(-1)
+			elseif input.KeyCode == Enum.KeyCode.Return then -- Eat new lines
+				self:SetEntryText(self:GetEntryText():gsub("\n", ""):gsub("\r", ""))
+			elseif input.KeyCode == Enum.KeyCode.Tab then -- Auto complete
+				local item=AutoComplete:GetSelectedItem()
+				local text:string=self:GetEntryText()
+				if item and not (text:sub(#text, #text):match("%s") and AutoComplete.LastItem) then
+					local replace=item[2]
+					local newText
+					local insertSpace=true
+					local command=AutoComplete.Command
+
+					if command then
+						local lastArg=AutoComplete.Arg
+
+						newText=command.Alias
+						insertSpace=AutoComplete.NumArgs ~= #command.ArgumentDefinitions
+							and AutoComplete.IsPartial == false
+
+						local args=command.Arguments
+						for i=1, #args do
+							local arg=args[i]
+							local segments=arg.RawSegments
+							if arg == lastArg then
+								segments[#segments]=replace
+							end
+
+							local argText=arg.Prefix .. table.concat(segments, ",")
+
+							-- Put auto completion options in quotation marks if they have a space
+							if argText:find(" ") or argText == "" then
+								argText=("%q"):format(argText)
+							end
+
+							newText=("%s %s"):format(newText, argText)
+
+							if arg == lastArg then
+								break
+							end
+						end
+					else
+						newText=replace
+					end
+					-- need to wait a frame so we can eat the \t
+					task.wait()
+					-- Update the text box
+					self:SetEntryText(newText .. (insertSpace and " " or ""))
+				else
+					-- Still need to eat the \t even if there is no auto-complete to show
+					task.wait()
+					self:SetEntryText(self:GetEntryText())
+				end
+			else
+				self:ClearHistoryState()
+			end
+		end
+		
+		Dispatcher.Window=Window
+		
+		Entry.TextBox.FocusLost:Connect(function(submit)
+			Window:LoseFocus(submit)
+		end)
+
+		Entry.TextBox:GetPropertyChangedSignal("Text"):Connect(function()
+			MainFrame.CanvasPosition=Vector2.new(0, MainFrame.AbsoluteCanvasSize.Y)
+
+			local text=Entry.TextBox.Text
+
+			if text:match("\t") then
+				Entry.TextBox.Text=text:gsub("\t", "")
+				return
+			end
+
+			OnTextChanged(text)
+		end)
+
+		UserInputService.InputBegan:Connect(function(input,typing)
+			Window:BeginInput(input,typing)
+		end)
+
+		--MainFrame.ChildAdded:Connect(function()
+		--	task.defer(Window.ApplyWindowHeight)
+		--end)
+
+		Window:ApplyTitle()
+		Window:ApplyWindowHeight()
+		GrabUI(OpenButton)
+
+		--OpenButton.Activated:Connect(function()
+		--	ApplyActive()
+		--end)
+		
+
+	end
+	
+	CmdrYield.Name="CmdrYield"
+	CmdrYield.ClassName="CmdrYield"
+	CmdrYield.Util=Util
+	CmdrYield.Window=Window
+	CmdrYield.Registry=Registry
+
+	CmdrYield.Loaded=true
+	
+	warn("Cmdr Yield Loaded, Press F3 to open CmdrYield if pc")
+end
+
+return CmdrYield
